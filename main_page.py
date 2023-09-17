@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-import polars as pl
+from src import data_handling
 from dotenv import load_dotenv
 
 CURRENT_DIR = os.path.realpath(os.path.dirname(__file__))
@@ -25,13 +25,6 @@ def handle_page_config():
     )
 
 
-def load_data(sheets_url):
-    csv_url: str = sheets_url.replace("/edit#gid=", "/export?format=csv&gid=")
-    df = pl.read_csv(csv_url, truncate_ragged_lines=True)
-    df.select("Amount").cast({"Amount": pl.Decimal(scale=2, precision=8)})
-    return df
-
-
 def format_header():
     with st.container():
         st.markdown(
@@ -39,32 +32,6 @@ def format_header():
             unsafe_allow_html=True,
         )
         st.markdown("---")
-
-
-def compute_metrics(data):
-    count_of_items = data.select(pl.count()).item()
-    sum_of_items = data.select(pl.sum("Amount")).item()
-
-    cheapest_item = (
-        data.filter(pl.col("Amount") == pl.min("Amount"))
-        .row(0, named=True)
-        .get("Amount")
-    )
-
-    expensive_item = (
-        data.filter(pl.col("Amount") == pl.max("Amount"))
-        .row(0, named=True)
-        .get("Amount")
-    )
-
-    ret = {
-        "count_of_items": count_of_items,
-        "sum_of_items": sum_of_items,
-        "cheapest_item": cheapest_item,
-        "expensive_item": expensive_item,
-    }
-
-    return ret
 
 
 def format_metrics(count_of_items, sum_of_items, cheapest_item, expensive_item):
@@ -93,13 +60,12 @@ def format_dataframe(data):
 
 
 def main():
-    data = load_data(SHEETS_URL)
-
     load_dotenv()
     handle_page_config()
     inject_css()
 
-    metrics_dict = compute_metrics(data)
+    data = data_handling.load_data(SHEETS_URL)
+    metrics_dict = data_handling.compute_metrics(data)
 
     format_header()
     format_metrics(
