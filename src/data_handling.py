@@ -7,7 +7,10 @@ def load_data(sheets_url):
         pl.col("Purchased") != True
     )
     df.select("Amount").cast({"Amount": pl.Decimal(scale=2, precision=8)})
-    return df
+    df.drop_in_place("Purchased")
+    df.drop_in_place("Want/Amt")
+    df.drop_in_place("norm r/a")
+    return df.sort("Efficiency Rank")
 
 
 def compute_metrics(data):
