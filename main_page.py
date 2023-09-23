@@ -8,8 +8,6 @@ CSS_FILE = f"{CURRENT_DIR}/src/styles/main.css"
 PAGE_TITLE = "Wishlist"
 PAGE_ICON = "🎁"
 
-SHEETS_URL = os.environ.get("SHEETS_URL")
-
 
 def inject_css():
     with open(CSS_FILE) as f:
@@ -25,7 +23,7 @@ def handle_page_config():
     )
 
 
-def format_header():
+def render_header():
     with st.container():
         st.markdown(
             "<h2 style='text-align: right'>Sean's Wishlist | 🎁</h2>",
@@ -34,20 +32,21 @@ def format_header():
         st.markdown("---")
 
 
-def format_metrics(count_of_items, sum_of_items, cheapest_item, expensive_item):
+def render_metrics(count_of_items, sum_of_items, cheapest_item, expensive_item):
     col0, col1, col2, col3 = st.columns(4)
 
-    with col0:
-        st.metric(label="Count of items", value=count_of_items)
-    with col1:
-        st.metric(label="Sum of all items", value=f"{sum_of_items:.2f}")
-    with col2:
-        st.metric(label="Cheapest item", value=f"{cheapest_item:.2f}")
-    with col3:
-        st.metric(label="Most expensive item", value=f"{expensive_item}")
+    with st.container():
+        with col0:
+            st.metric(label="Count of items", value=count_of_items)
+        with col1:
+            st.metric(label="Sum of all items", value=f"{sum_of_items:.2f}")
+        with col2:
+            st.metric(label="Cheapest item", value=f"{cheapest_item:.2f}")
+        with col3:
+            st.metric(label="Most expensive item", value=f"{expensive_item}")
 
 
-def format_dataframe(data):
+def render_dataframe(data):
     with st.container():
         st.dataframe(
             data=data,
@@ -61,20 +60,22 @@ def format_dataframe(data):
 
 def main():
     load_dotenv()
+    SHEETS_URL = os.environ.get("SHEETS_URL")
+
     handle_page_config()
     inject_css()
 
     data = data_handling.load_data(SHEETS_URL)
     metrics_dict = data_handling.compute_metrics(data)
 
-    format_header()
-    format_metrics(
+    render_header()
+    render_metrics(
         metrics_dict.get("count_of_items"),
         metrics_dict.get("sum_of_items"),
         metrics_dict.get("cheapest_item"),
         metrics_dict.get("expensive_item"),
     )
-    format_dataframe(data)
+    render_dataframe(data)
 
 
 if __name__ == "__main__":
