@@ -13,9 +13,14 @@ def load_data(sheets_url):
     return df.sort("Efficiency Rank")
 
 
-def compute_metrics(data):
+def compute_metrics(data: pl.DataFrame):
     count_of_items = data.select(pl.count()).item()
-    sum_of_items = data.select(pl.sum("Amount")).item()
+
+    most_effecient_item = (
+        data.filter(pl.col("Efficiency Rank") == pl.max("Efficiency Rank"))
+        .row(0, named=True)
+        .get("Item")
+    )
 
     cheapest_item = (
         data.filter(pl.col("Amount") == pl.min("Amount"))
@@ -31,7 +36,7 @@ def compute_metrics(data):
 
     ret = {
         "count_of_items": count_of_items,
-        "sum_of_items": sum_of_items,
+        "most_effecient_item": most_effecient_item,
         "cheapest_item": cheapest_item,
         "expensive_item": expensive_item,
     }

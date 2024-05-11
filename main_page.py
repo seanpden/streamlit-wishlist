@@ -32,18 +32,18 @@ def render_header():
         st.markdown("---")
 
 
-def render_metrics(count_of_items, sum_of_items, cheapest_item, expensive_item):
+def render_metrics(count_of_items, most_effecient_item, cheapest_item, expensive_item):
     col0, col1, col2, col3 = st.columns(4)
 
     with st.container():
         with col0:
             st.metric(label="Count of items", value=count_of_items)
         with col1:
-            st.metric(label="Sum of all items", value=f"{sum_of_items:.2f}")
+            st.metric(label="Most effecient item", value=f"{most_effecient_item}")
         with col2:
-            st.metric(label="Cheapest item", value=f"{cheapest_item:.2f}")
+            st.metric(label="Cheapest item", value=f"${cheapest_item:.2f}")
         with col3:
-            st.metric(label="Most expensive item", value=f"{expensive_item}")
+            st.metric(label="Most expensive item", value=f"${expensive_item:.2f}")
 
 
 def render_dataframe(data):
@@ -71,7 +71,7 @@ def main():
     render_header()
     render_metrics(
         metrics_dict.get("count_of_items"),
-        metrics_dict.get("sum_of_items"),
+        metrics_dict.get("most_effecient_item"),
         metrics_dict.get("cheapest_item"),
         metrics_dict.get("expensive_item"),
     )
