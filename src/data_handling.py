@@ -17,7 +17,7 @@ def compute_metrics(data: pl.DataFrame):
     count_of_items = data.select(pl.count()).item()
 
     most_effecient_item = (
-        data.filter(pl.col("Efficiency Rank") == pl.max("Efficiency Rank"))
+        data.filter(pl.col("Efficiency Rank") == pl.min("Efficiency Rank"))
         .row(0, named=True)
         .get("Item")
     )
