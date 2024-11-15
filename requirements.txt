@@ -1,3 +1,0 @@
-streamlit==1.26.0
-polars==0.19.3
-python-dotenv==1.0.0
