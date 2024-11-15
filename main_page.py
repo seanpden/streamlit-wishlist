@@ -1,4 +1,5 @@
 import streamlit as st
+import polars as pl
 import os
 from src import data_handling
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ PAGE_ICON = "🎁"
 
 def inject_css():
     with open(CSS_FILE) as f:
-        st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
+        _ = st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
 
 
 def handle_page_config():
@@ -25,11 +26,11 @@ def handle_page_config():
 
 def render_header():
     with st.container():
-        st.markdown(
-            "<h2 style='text-align: right'>Sean's Wishlist | 🎁</h2>",
+        _ = st.markdown(
+            "<h2>Sean's Wishlist 🎁</h2>",
             unsafe_allow_html=True,
         )
-        st.markdown("---")
+        _ = st.markdown("---")
 
 
 def render_metrics(count_of_items, most_effecient_item, cheapest_item, expensive_item):
@@ -37,25 +38,36 @@ def render_metrics(count_of_items, most_effecient_item, cheapest_item, expensive
 
     with st.container():
         with col0:
-            st.metric(label="Count of items", value=count_of_items)
+            _ = st.metric(label="Count of items", value=count_of_items)
         with col1:
-            st.metric(label="Most effecient item", value=f"{most_effecient_item}")
+            _ = st.metric(label="Most effecient item", value=f"{most_effecient_item}")
         with col2:
-            st.metric(label="Cheapest item", value=f"${cheapest_item:.2f}")
+            _ = st.metric(label="Cheapest item", value=f"${cheapest_item:.2f}")
         with col3:
-            st.metric(label="Most expensive item", value=f"${expensive_item:.2f}")
+            _ = st.metric(label="Most expensive item", value=f"${expensive_item:.2f}")
 
 
-def render_dataframe(data):
+def render_dataframe(data: pl.DataFrame):
     with st.container():
-        st.dataframe(
-            data=data,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Amount": st.column_config.NumberColumn("Amount", format="$%.2f")
-            },
-        )
+        count = 0
+        for row in data.iter_rows(named=True):
+            count += 1
+            with st.expander(label=f"{count}\. {row['Item']}, ${row['Amount']:.0f}"):
+                st.write(f"**Want Rating**: _{row['Want (1-10)']}_")
+                st.write(f"**Date Added**: _{row['Date Added']}_")
+                st.write(f"**Amount**: $_{row['Amount']:.2f}_")
+                st.write(f"**Link**: _{row['Link']}_")
+                st.markdown("---")
+                st.write(f"**Description**: _{row['Desc.']}_")
+                st.write(f"**Comment**: _{row['Comments']}_")
+        # st.dataframe(
+        #     data=data,
+        #     use_container_width=True,
+        #     hide_index=True,
+        #     column_config={
+        #         "Amount": st.column_config.NumberColumn("Amount", format="$%.2f")
+        #     },
+        # )
 
 
 def main():
