@@ -47,6 +47,30 @@ def render_metrics(count_of_items, most_effecient_item, cheapest_item, expensive
             _ = st.metric(label="Most expensive item", value=f"${expensive_item:.2f}")
 
 
+def render_filter(data: pl.DataFrame) -> pl.DataFrame:
+    filter_options: dict = {
+        "Most efficient first": "Efficiency Rank",  # Works
+        "Highest want rating first": "Want (1-10)",  # Works
+        "Cheapest first": "Amount",  # Works
+        "Recently added first": "Date Added",  # Works
+    }
+
+    with st.expander("Filter..."):
+        chosen_option: str = st.radio(
+            label="Filter...",
+            options=filter_options.keys(),
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+
+    # If "want rating" is chosen, be sure to sort by descending
+    if chosen_option == "Highest want rating first":
+        return data.sort(str(filter_options[chosen_option]), descending=True)
+
+    # Otherwise, just sort by ascending (default)
+    return data.sort(str(filter_options[chosen_option]))
+
+
 def render_dataframe(data: pl.DataFrame):
     with st.container():
         count = 0
@@ -58,16 +82,8 @@ def render_dataframe(data: pl.DataFrame):
                 st.write(f"**Amount**: $_{row['Amount']:.2f}_")
                 st.write(f"**Link**: _{row['Link']}_")
                 st.markdown("---")
-                st.write(f"**Description**: _{row['Desc.']}_")
-                st.write(f"**Comment**: _{row['Comments']}_")
-        # st.dataframe(
-        #     data=data,
-        #     use_container_width=True,
-        #     hide_index=True,
-        #     column_config={
-        #         "Amount": st.column_config.NumberColumn("Amount", format="$%.2f")
-        #     },
-        # )
+                st.write(f"**Description**: _{str(row['Desc.']).strip()}_")
+                st.write(f"**Comment**: _{str(row['Comments']).strip()}_")
 
 
 def main():
@@ -78,15 +94,16 @@ def main():
     inject_css()
 
     data = data_handling.load_data(SHEETS_URL)
-    metrics_dict = data_handling.compute_metrics(data)
+    # metrics_dict = data_handling.compute_metrics(data)
 
     render_header()
-    render_metrics(
-        metrics_dict.get("count_of_items"),
-        metrics_dict.get("most_effecient_item"),
-        metrics_dict.get("cheapest_item"),
-        metrics_dict.get("expensive_item"),
-    )
+    # render_metrics(
+    #     metrics_dict.get("count_of_items"),
+    #     metrics_dict.get("most_effecient_item"),
+    #     metrics_dict.get("cheapest_item"),
+    #     metrics_dict.get("expensive_item"),
+    # )
+    data = render_filter(data)
     render_dataframe(data)
 
 
